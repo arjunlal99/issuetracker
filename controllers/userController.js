@@ -1,20 +1,23 @@
-var generateHash = require('../auth/auth.js').generateHash
+var generateHash = require('../auth/auth.js').generateHash //function to generate hash using sha-256 algorithm
 var mongoose = require('mongoose')
 require('dotenv').config({path:'../.env'})
 var userSchema = require('../models/user.js')
 
 var conn = mongoose.createConnection(process.env.DB_URI, {useNewUrlParser: true, useUnifiedTopology:true})
-conn.once('open', () => {
+conn.once('open', async () => {
     console.log('User Connection Established')
     
     //signUp('kopiko', 'kopiko@cappuccino.com', '123456')
     
-    userCheck('example', 'example@email.com').then((docs) => console.log("user exists")).catch((err) => console.log(err))
+    //userCheck('example', 'example@email.com').then((docs) => console.log("user exists")).catch((err) => console.log(err))
+    //console.log(await usernameCheck('example'))
+    //console.log(await passwordCheck('example', 'somwthin'))
 })
 
 var userModel = conn.model('users', userSchema)
-
-//function for creating new User
+/*
+    Function for creating new User
+*/
 function signUp(username, email, password){
     return new Promise((resolve, reject) => {
         var userInstance = new userModel({
@@ -34,10 +37,13 @@ function signUp(username, email, password){
     })
 }
 
-//function for checking if username or email already exists
-function userCheck(username, email){
+/*Function for checking if username already exists
+    --> returns true if username already exists, false if it doesn't
+    
+*/
+function usernameCheck(username){
     return new Promise((resolve,reject) => {
-        userModel.exists({username: username}, (err, docs) => {
+        userModel.exists({username: username}, (err,docs) => {
             if (err){
                 return reject(err)
             }
@@ -48,9 +54,45 @@ function userCheck(username, email){
     })
 }
 
+/*
+    Function for checking if email already exists
+    --> returns true if email already exists, false if it doesn't
+    
+*/
+function emailCheck(email){
+    return new Promise((resolve,reject) => {
+        userModel.exists({email: email}, (err,docs) => {
+            if (err){
+                return reject(err)
+            }
+            else{
+                resolve(docs)
+            }
+        })
+    })
+}
 
-
+/*
+    Function to verify if password is correct for a user. (Assumes user already exists)
+        --> resolves true if password is correct, false if it isn't
+*/
+function passwordCheck(username, password){
+    return new Promise((resolve,reject) => {
+        userModel.findOne({username: username}, (err,docs) => {
+            if (err){
+                return reject(err)
+            }
+            else{
+                if (docs.password_hash == generateHash(password)) resolve(true)
+                else resolve(false)
+            }
+        })
+    })
+}
 
 module.exports = {
-    signUp
+    signUp,
+    usernameCheck,
+    emailCheck,
+    passwordCheck
 }
