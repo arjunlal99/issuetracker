@@ -91,6 +91,7 @@ function passwordCheck(username, password){
 }
 
 module.exports = {
+    
     signUp,
     usernameCheck,
     emailCheck,

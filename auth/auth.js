@@ -8,6 +8,8 @@ function generateHash(payload){
 }
 
 
+
 module.exports = {
     generateHash
 }
+

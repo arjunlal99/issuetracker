@@ -5,6 +5,8 @@ var cookieParser = require('cookie-parser')
 
 var jwt = require('./auth/jwt.js')
 
+//var loadPlugin = require('./plugin/pluginLoader.js')
+
 //importing controllers
 var userController = require('./controllers/userController.js')
 
@@ -41,6 +43,13 @@ app.post('/auth/gentoken', usernameCheck, passwordCheck, async (req,res) => {
 
 })
 
+/*
+function loadPlugins(){
+    loadPlugin('/home/arjun/testPlugin')
+}
 
-
-app.listen(8001, () => console.log("Application listening at port 8001..."))
+*/
+app.listen(8001, () => {
+    console.log("Application listening at port 8001...")
+   // setTimeout(loadPlugins, 10000)
+})
