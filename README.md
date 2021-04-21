@@ -2,9 +2,10 @@
 
 Framework for extensible bug/feature tracking system.
 
-##Install requirements(if not installed)
+## Install requirements(if not installed)
 
 1.node.js
+
 2.npm 
 
 ## Steps to get the project up and running
