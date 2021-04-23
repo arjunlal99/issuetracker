@@ -87,17 +87,19 @@ function getAllprojects(){
 }
 
 /*
-    Function to add new triager to a project
+    Function to add new triager to a project (Assuming triager is not already in the array)
 */
 
 function addTriager(project_id, username){
-    return new Promise((resolve,reject) => {
-        projectModel.findOne({project_id: project_id},(err,docs) => {
-            if(err){
+    return new Promise(async (resolve,reject) => {
+        var project = await projectModel.findOne({project_id: project_id})
+        project.triagers.push(username)
+        project.save((err,docs) => {
+            if (err){
                 return reject(err)
             }
             else{
-
+                resolve(docs)
             }
         })
     })
@@ -122,12 +124,23 @@ function getTriagers(project_id){
 
 }
 
+/*
+    Function to check if a user is already a triager for a project
+    --> Should resolve true if user already exists, false if not
+*/
+
+function isTriager(project_id, username){
+
+}
+
+
 module.exports = {
     
     createProject,
     projectCheck,
     getProjectbyId,
     getAllprojects,
-    getTriagers
+    getTriagers,
+    addTriager
     
 }
