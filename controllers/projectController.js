@@ -40,7 +40,14 @@ function createProject(project_id, project_name, components, repository, triager
 */
 
 function getProjectbyId(project_id){
-
+    return new Promise((resolve,reject) => {
+        projectModel.findOne({project_id:project_id},(err,docs)=>{
+            if(err){
+                return reject(err)
+            }
+            else resolve(docs)
+        })
+    })
 }
 
 /*
@@ -48,7 +55,16 @@ function getProjectbyId(project_id){
 */
 
 function projectCheck(project_id){
-
+    return new Promise((resolve,reject) => {
+        projectModel.exists({project_id: project_id}, (err,docs) => {
+            if (err){
+                return reject(err)
+            }
+            else{
+                resolve(docs)
+            }
+        })
+    })
 }
 
 /*
@@ -56,6 +72,17 @@ function projectCheck(project_id){
 */
 
 function getAllprojects(){
+    return new Promise((resolve,reject) => {
+        projectModel.find({},(err,docs)=>{
+            if(err){
+                return reject(err)
+            }
+            else{
+                resolve(docs)
+            }
+        })
+
+    })
 
 }
 
@@ -64,6 +91,16 @@ function getAllprojects(){
 */
 
 function addTriager(project_id, username){
+    return new Promise((resolve,reject) => {
+        projectModel.findOne({project_id: project_id},(err,docs) => {
+            if(err){
+                return reject(err)
+            }
+            else{
+
+            }
+        })
+    })
 
 }
 
@@ -72,5 +109,25 @@ function addTriager(project_id, username){
 */
 
 function getTriagers(project_id){
+    return new Promise((resolve,reject) => {
+        projectModel.findOne({project_id: project_id}, (err,docs) => {
+            if (err){
+                return reject(err)
+            }
+            else{
+                resolve(docs.triagers)
+            }
+        })
+    })
 
+}
+
+module.exports = {
+    
+    createProject,
+    projectCheck,
+    getProjectbyId,
+    getAllprojects,
+    getTriagers
+    
 }
