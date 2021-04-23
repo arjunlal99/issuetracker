@@ -133,6 +133,22 @@ function isTriager(project_id, username){
 
 }
 
+/*
+    Function to add a component to a project
+*/
+
+function addComponent(project_id, component){
+
+}
+
+/*
+    Function to check if a component is present in project
+*/
+
+function isComponent(project_id, component){
+
+}
+
 
 module.exports = {
     
