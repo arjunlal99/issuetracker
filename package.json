@@ -15,5 +15,13 @@
     "fs-extra": "^9.1.0",
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^5.12.3"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/arjunlal99/issuetracker.git"
+  },
+  "bugs": {
+    "url": "https://github.com/arjunlal99/issuetracker/issues"
+  },
+  "homepage": "https://github.com/arjunlal99/issuetracker#readme"
 }
