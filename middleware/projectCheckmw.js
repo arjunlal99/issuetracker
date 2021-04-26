@@ -3,12 +3,12 @@ const projectController = require('../controllers/projectController.js')
     Middleware function to check if project already exists ,used before creating new project
 */
 module.exports = async (req,res,next) => {
-    var projectExists = await projectController.projectCheck(req.body.project_id)
-    console.log(projectExists)
+    var projectExists = await projectController.projectCheck(req.params.id)
+    // console.log(projectExists)
     if (projectExists){
-        res.status(500).send({msg: "Project already exists"})
+        next()
     }
     else{
-        next()
+        res.status(500).send({msg: "Project does not exists"})
     }
 }
