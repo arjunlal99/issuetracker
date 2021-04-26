@@ -112,5 +112,6 @@ module.exports = {
    createReport,
    getReportbyId,
    getReports,
+   triage
    
 }
