@@ -50,6 +50,7 @@ app.post('/createProject',projectCheck, async (req,res) => {
     var response = await projectController.createProject(req.body.project_id, req.body.project_name, req.body.components, req.body.repository, req.body.triagers, req.body.platforms)
     res.send({msg: `New Project created: Project id -> ${response.project_id}, Project name -> ${response.project_name}`})
 })
+
 */
 
 /*
