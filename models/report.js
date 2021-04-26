@@ -2,23 +2,21 @@ var mongoose = require('mongoose')
 
 var Schema = mongoose.Schema
 
-var reportSchema = new Scheme({
-    report_id :  {type: Number, required: true, unique: true},
+var reportSchema = new Schema({
     project_id :  {type: Number, required: true},
     platforms : [String],
-    components : [String],
     type : String,
     status : String,
     priority : Number,
     labels : [String],
-    reporter : [String],
+    reporter : String,
     assigned_to : [String],
-    last_modified : Date,
+    last_modified : {type: Date, default: Date.now()},
     title : String,
     description : String,
     version : Number,
-    first_comment : String,
-    attachments : [String]
+    first_comment : {type: String, default: null},
+    attachments : {type: [String], default: null}
 })
 
 module.exports = reportSchema
