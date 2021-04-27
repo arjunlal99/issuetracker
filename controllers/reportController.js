@@ -7,13 +7,12 @@ conn.once('open', async() => {
     console.log('Report Connection Established')
 })
 
-
 var reportModel = conn.model('reports', reportSchema)
- 
-/*
+ /*
     Function to create new report
     
 */
+
 function createReport( project_id, platforms, type, status, priority, labels, reporter, assigned_to, title, description, version, first_comment=null, attachments=null){
     return new Promise((resolve, reject) => {
             reportobj = {
@@ -61,6 +60,27 @@ function getReportbyId(id){
         })
     })
 }
+
+/*
+    Function to retireve all reports
+*/
+
+function getAllreports(){
+    return new Promise((resolve,reject) => {
+        reportModel.find({},(err,docs)=>{
+            if(err){
+                return reject(err)
+            }
+            else{
+                resolve(docs)
+            }
+        })
+
+    })
+
+}
+
+
 /*
     Function to retrieve reports of a project using project_id
 */
@@ -111,6 +131,7 @@ function triage(id, status = null, priority = 0, labels = null, assigned_to = nu
 module.exports = {
    createReport,
    getReportbyId,
+   getAllreports,
    getReports,
    triage
    
