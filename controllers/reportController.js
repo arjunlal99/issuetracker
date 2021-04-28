@@ -62,6 +62,22 @@ function getReportbyId(id){
 }
 
 /*
+   Function to check if a report exists
+*/
+function reportCheck(id){
+    return new Promise((resolve,reject) => {
+        reportModel.exists({_id: id}, (err,docs) => {
+            if (err){
+                return reject(err)
+            }
+            else{
+                resolve(docs)
+            }
+        })
+    })
+}
+
+/*
     Function to retireve all reports
 */
 
@@ -94,6 +110,21 @@ function getReports(project_id){
         })
     })
 }
+/*
+   Function to add firstComment
+*/
+function addComment(id,comment){
+    return new Promise(async (resolve,reject) => {
+        var report = await reportModel.findOne({_id : id})
+        report.first_comment=comment
+        report.save((err,docs) => {
+            if(err){
+                return reject(err)
+            }
+            else resolve(docs)
+        })
+    })
+} 
 
 /*
   Function to triage a report
@@ -111,7 +142,10 @@ function triage(id, status = null, priority = 0, labels = null, assigned_to = nu
             report.labels.push(labels)
         }
         if(assigned_to){
-            report.assigned_to.push(assigned_to)
+            if(report.assigned_to){
+                report.assigned_to.push(assigned_to)
+            }
+            else report.assigned_to=assigned_to
         }
         if(attachments){
             report.attachments.push(attachments)
@@ -133,6 +167,8 @@ module.exports = {
    getReportbyId,
    getAllreports,
    getReports,
-   triage
+   triage,
+   reportCheck,
+   addComment
    
 }
