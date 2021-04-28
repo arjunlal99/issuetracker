@@ -77,7 +77,6 @@ app.get('/project/', async(req,res) => {
 
 /*
    Endpoint to see all reports 
-
 */
 app.get('/report/',async(req,res) => {
     var response = await reportController.getAllreports()
@@ -150,7 +149,6 @@ app.post('/comment/:comment_id/reply',async(req,res) => {
 function loadPlugins(){
     loadPlugin('/home/arjun/testPlugin')
 }
-
 */
 app.listen(8001, () => {
     console.log("Application listening at port 8001...")

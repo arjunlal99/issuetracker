@@ -120,6 +120,7 @@ function getTriagers(project_id){
                 resolve(docs.triagers)
             }
         })
+    
     })
 
 }
@@ -130,8 +131,20 @@ function getTriagers(project_id){
 */
 
 function isTriager(project_id, username){
-
+    return new Promise((resolve,reject) => {
+        projectModel.findOne({project_id: project_id}, (err,docs) => {
+            if (err){
+                return reject(err)
+            }
+            if(docs.triagers.includes(username)){
+                resolve(true)
+            }else{
+                resolve(false)
+            }
+        })   
+    })
 }
+
 
 /*
     Function to add a component to a project
