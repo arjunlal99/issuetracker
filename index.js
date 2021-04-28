@@ -45,7 +45,6 @@ app.post('/auth/gentoken', usernameCheck, passwordCheck, async (req,res) => {
     res.send({msg: 'Auth Token Cookie set successfully'})
 
 })
-
 /*
    Endpoint to get project by id
 */
@@ -63,7 +62,6 @@ app.get('/project/', async(req,res) => {
 
 /*
    Endpoint to see all reports of a project
-
 */
 app.get('/report/',async(req,res) => {
     var response = await reportController.getAllreports()
@@ -71,18 +69,26 @@ app.get('/report/',async(req,res) => {
 })
 
 /*
+    Endpoint to get report using project ID
+
+app.get('/report/:project_id',async(req,res) => {
+    var response = await reportController.getReports(req.params.project_id)
+    res.send({msg: `Reports : ${response}`})
+})
+
+*/
+
+
 app.post('/createProject',projectCheck, async (req,res) => {
     var response = await projectController.createProject(req.body.project_id, req.body.project_name, req.body.components, req.body.repository, req.body.triagers, req.body.platforms)
     res.send({msg: `New Project created: Project id -> ${response.project_id}, Project name -> ${response.project_name}`})
 })
 
-*/
 
 /*
 function loadPlugins(){
     loadPlugin('/home/arjun/testPlugin')
 }
-
 */
 app.listen(8001, () => {
     console.log("Application listening at port 8001...")
