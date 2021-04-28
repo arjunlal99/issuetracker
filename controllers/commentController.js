@@ -10,6 +10,12 @@ conn.once('open', async () => {
 //	getNextCommentId("60851209e3dfc41d06cbb0ca").then((docs) => console.log(docs)).catch((err) => console.log(err))
    // getNextCommentId("").then((docs) => console.log(docs)).catch((err) => console.log(err))
   // doesExist("60851209e3dfc41d06cbb0ca").then((docs) => console.log(docs)).catch((err) => console.log(err))
+/*	createComment("Arjun", "Testing adding comments at the end").then((docs) => {
+		addCommentEnd("60851209e3dfc41d06cbb0ca", docs._id).then((doc) => console.log("added")).catch((error) => console.log("error"))
+	}).catch((err) => {
+		console.log(err)
+	})
+	*/
 })
 
 var commentModel = conn.model('comments', commentSchema)
@@ -136,6 +142,27 @@ function addReplyComment(id, new_comment_id){
 	})
 }
 
+/*
+	Funcion to add comment to end of a chain given a comment_id
+*/
+function addCommentEnd(id, new_comment_id){
+	return new Promise(async (resolve,reject) => {
+		var curr_comment = await commentModel.findOne({_id: id})
+		
+		while (curr_comment.next_comment != null){
+			curr_comment = await commentModel.findOne({_id : curr_comment.next_comment})
+		}
+
+		curr_comment.next_comment = new_comment_id
+		curr_comment.save((err,docs) => {
+			if (err){
+				return reject(err)
+			}else{
+				resolve(docs)
+			}
+		})
+	})
+}
 
 module.exports = {
 	createComment,
@@ -144,5 +171,6 @@ module.exports = {
 	addReplyComment,
     getNextCommentId,
     getReplyCommentId,
+	addCommentEnd,
 	doesExist
 }

@@ -118,13 +118,24 @@ app.get('/comment/:comment_id',commentCheck, async(req,res) =>{
 app.get('/comment/:comment_id/reply', async(req,res) => {
     var response = await commentController.getReplyCommentId(req.params.comment_id)
     var comment = await commentController.getCommentById(response)
-    comment.send({msg :  `Reply ${comment} `})
+    res.send({msg :  `Reply ${comment} `})
 })
 /*
     Endpoint to add comment
 */
-app.post('/comment/:report_id', addcomment , (req, res) => {
-    res.send({msg: `New Comment created`})
+app.post('/comment/:report_id', async (req, res) => {
+    var comment = await commentController.createComment(req.body.user, req.body.comment)
+
+    var report = await reportController.getReportbyId(req.params.report_id)
+    if (report.first_comment == null){
+        await reportController.addComment(report._id, comment._id)
+        res.send({msg: `Comment added to report : ${comment}`})
+    }
+    else{
+        await commentController.addCommentEnd(report.first_comment, comment._id)
+        res.send({msg: `Comment added to report : ${comment}`})
+    }
+    
 })
 /*
     Endpoint to reply a comment
