@@ -117,7 +117,7 @@ app.get('/comment/:comment_id',commentCheck, async(req,res) =>{
 app.get('/comment/:comment_id/reply', async(req,res) => {
     var response = await commentController.getReplyCommentId(req.params.comment_id)
     var comment = await commentController.getCommentById(response)
-    comment.send({msg :  `Reply ${comment} `})
+    res.send({msg :  `Reply ${comment} `})
 })
 /*
     Endpoint to add comment
