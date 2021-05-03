@@ -2,9 +2,11 @@ var mongoose = require('mongoose')
 require('dotenv').config({path:'../.env'})
 var reportSchema = require('../models/report.js')
 
-var conn = mongoose.createConnection(process.env.DB_URI, {useNewUrlParser: true, useUnifiedTopology:true, useCreateIndex: true, useFindAndModify: false})
+var conn = mongoose.createConnection(process.env.DUMMY_URI, {useNewUrlParser: true, useUnifiedTopology:true, useCreateIndex: true, useFindAndModify: false})
 conn.once('open', async() => {
     console.log('Report Connection Established')
+
+    
 })
 
 var reportModel = conn.model('reports', reportSchema)
@@ -13,7 +15,7 @@ var reportModel = conn.model('reports', reportSchema)
     
 */
 
-function createReport( project_id, platforms, type, status, priority, labels, reporter, assigned_to, title, description, version, first_comment=null, attachments=null){
+function createReport( project_id, platforms, type, status, priority, labels, reporter, assigned_to, title, description, version, component, first_comment=null, attachments=null){
     return new Promise((resolve, reject) => {
             reportobj = {
             project_id : project_id,
@@ -27,6 +29,7 @@ function createReport( project_id, platforms, type, status, priority, labels, re
             title : title,
             description : description,
             version : version,
+            component: component
         }
         if(first_comment){
             reportobj.first_comment = first_comment
@@ -95,7 +98,6 @@ function getAllreports(){
     })
 
 }
-
 
 /*
     Function to retrieve reports of a project using project_id

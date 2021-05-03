@@ -126,6 +126,7 @@ app.post('/comment/:report_id', async (req, res) => {
     var comment = await commentController.createComment(req.body.user, req.body.comment)
 
     var report = await reportController.getReportbyId(req.params.report_id)
+    
     if (report.first_comment == null){
         await reportController.addComment(report._id, comment._id)
         res.send({msg: `Comment added to report : ${comment}`})
