@@ -1,15 +1,31 @@
 var generateHash = require('../auth/auth.js').generateHash //function to generate hash using sha-256 algorithm
 var mongoose = require('mongoose')
 require('dotenv').config({path:'../.env'})
+
+//Event Emitters
+const EventEmitter = require('events')
+
+class UserName extends EventEmitter{
+    addListener(callback){
+        this.on('onUsernameCheck', callback)
+    }
+}
+
+const onUsernameCheck = new UserName()
+
+onUsernameCheck.addListener((username,docs) => {
+    console.log(username,docs)
+})
+
+
 var userSchema = require('../models/user.js')
 
 var conn = mongoose.createConnection(process.env.DB_URI, {useNewUrlParser: true, useUnifiedTopology:true})
 conn.once('open', async () => {
     console.log('User Connection Established')
-    
     //signUp('kopiko', 'kopiko@cappuccino.com', '123456')
     
-    //userCheck('example', 'example@email.com').then((docs) => console.log("user exists")).catch((err) => console.log(err))
+    //usernameCheck('example').then((docs) => console.log("user exists")).catch((err) => console.log(err))
     //console.log(await usernameCheck('example'))
     //console.log(await passwordCheck('example', 'somwthin'))
 })
@@ -48,6 +64,7 @@ function usernameCheck(username){
                 return reject(err)
             }
             else{
+                onUsernameCheck.emit('onUsernameCheck', username, docs)
                 resolve(docs)
             }
         })
@@ -90,10 +107,16 @@ function passwordCheck(username, password){
     })
 }
 
+function healthCheck(){
+    return conn.readyState
+}
+
 module.exports = {
     
     signUp,
     usernameCheck,
     emailCheck,
-    passwordCheck
+    passwordCheck,
+    onUsernameCheck,
+    healthCheck
 }

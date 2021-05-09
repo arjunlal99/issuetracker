@@ -1,6 +1,8 @@
 const fs = require('fs')
 const fse = require('fs-extra')
 const path = require('path')
+const {spawn, fork} = require('child_process')
+
 
 /*
     function to load plugin directory into app directory
@@ -8,7 +10,7 @@ const path = require('path')
 
 */
 
-function loadPlugin(pluginPath){
+function loadPlugin(pluginPath,pluginManager){
     if (fs.existsSync(pluginPath)){
         
         if (fs.existsSync(pluginPath + '/manifest.json')){
@@ -25,7 +27,18 @@ function loadPlugin(pluginPath){
             
             console.log(manifest.entry_point)
 
-            require(path.dirname(module.parent.filename) + '/plugin/temp/' + tempDirectory + '/' + manifest.entry_point)
+            //require(path.dirname(module.parent.filename) + '/plugin/temp/' + tempDirectory + '/' + manifest.entry_point)
+
+            //creates new fork for an extension instance
+            var extensionInstance = fork(path.dirname(module.parent.filename) + '/plugin/temp/' + tempDirectory + '/' + manifest.entry_point,[],{silent:true})
+            pluginManager.add(extensionInstance, tempDirectory)
+            //pluginManager.display()
+            extensionInstance.stdout.on('data', data => {
+                console.log(`stdout (${extensionInstance.pid}) : `, data.toString())
+            })
+            extensionInstance.stderr.on('data', data => {
+                console.log(`stderr (${extensionInstance.pid}) : `, data.toString())
+            })
         }
         else{
             console.log("Unable to recognise plugin")

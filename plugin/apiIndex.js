@@ -8,7 +8,8 @@ const apiIndex = {
         "signUp": userController.signUp,
         "usernameCheck": userController.usernameCheck,
         "emailCheck": userController.emailCheck,
-        "passwordCheck": userController.passwordCheck
+        "passwordCheck": userController.passwordCheck,
+        "onUsernameCheck": userController.onUsernameCheck
     },
     "projectController":{
 

@@ -25,7 +25,7 @@ module.exports = function() {
         }
         
     }
-
+    
     return BasePluginInstance
     
 }
