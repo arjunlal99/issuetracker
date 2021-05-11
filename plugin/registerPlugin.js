@@ -12,7 +12,7 @@ module.exports = function() {
     manifest = JSON.parse(manifest)
     
     //create new BasePluginInstance using info from manifest.json
-    var BasePluginInstance = new BasePlugin(manifest.name, manifest.description, manifest.version, manifest.entry_point)
+    var BasePluginInstance = new BasePlugin(manifest.name, manifest.description, manifest.version, manifest.entry_point, manifest.permissions)
 
     for(var core in manifest.permissions){
 

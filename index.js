@@ -1,5 +1,5 @@
-var rl = require('./cli/cli.js').rl
-var pluginManager = require('./cli/cli.js').pluginManager
+var rl = require('./cli.js')
+var pluginManager = require('./plugin/pluginManager.js')
 
 var express = require('express')
 var app = express()
@@ -12,7 +12,7 @@ var cookieParser = require('cookie-parser')
 
 var jwt = require('./auth/jwt.js')
 
-var loadPlugin = require('./plugin/pluginLoader.js')
+//var loadPlugin = require('./plugin/pluginLoader.js')
 
 //importing controllers
 var userController = require('./controllers/userController.js')
@@ -52,16 +52,16 @@ app.post('/auth/gentoken', usernameCheck, passwordCheck, async (req,res) => {
 
 })
 
-
+/*
 function loadPlugins(){
-    loadPlugin('/home/arjun/testPlugin', pluginManager)
+    //loadPlugin('/home/arjun/testPlugin', pluginManager)
    // loadPlugin('/home/arjun/testPlugin', pluginManager)
 }
-
+*/
 
 app.listen(8001, () => {
     console.log("Application listening at port 8001...")
-    setTimeout(loadPlugins, 0)
+    //setTimeout(loadPlugins, 0)
     
     
     rl.prompt()

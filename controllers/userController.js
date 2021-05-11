@@ -3,6 +3,8 @@ var mongoose = require('mongoose')
 require('dotenv').config({path:'../.env'})
 
 //Event Emitters
+var pluginManager = require("../plugin/pluginManager.js")
+
 const EventEmitter = require('events')
 
 class UserName extends EventEmitter{
@@ -14,7 +16,8 @@ class UserName extends EventEmitter{
 const onUsernameCheck = new UserName()
 
 onUsernameCheck.addListener((username,docs) => {
-    console.log(username,docs)
+    //console.log(username,docs)
+    pluginManager.emitEvents("userController", "onUsernameCheck", [username,docs])
 })
 
 
@@ -23,9 +26,11 @@ var userSchema = require('../models/user.js')
 var conn = mongoose.createConnection(process.env.DB_URI, {useNewUrlParser: true, useUnifiedTopology:true})
 conn.once('open', async () => {
     console.log('User Connection Established')
+   // pluginManager.emitEvents()
     //signUp('kopiko', 'kopiko@cappuccino.com', '123456')
     
-    //usernameCheck('example').then((docs) => console.log("user exists")).catch((err) => console.log(err))
+    //usernameCheck('example').then((docs) => console.log(docs)).catch((err) => console.log(err))
+    //usernameCheck('somwthing').then((docs) => console.log(docs)).catch((err) => console.log(err))
     //console.log(await usernameCheck('example'))
     //console.log(await passwordCheck('example', 'somwthin'))
 })
