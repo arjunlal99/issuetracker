@@ -13,6 +13,8 @@ var projectController = require('./controllers/projectController.js')
 var reportController = require('./controllers/reportController.js')
 var commentController = require('./controllers/commentController.js')
 
+var similarity = require("./similarity/similarity.js")
+
 //importing middleware
 var userCheck = require('./middleware/userCheckmw.js')
 var usernameCheck = require('./middleware/usernameCheckmw.js')
@@ -144,6 +146,14 @@ app.post('/comment/:comment_id/reply',async(req,res) => {
     var comment = await commentController.createComment(req.body.user, req.body.comment)
     var response = await commentController.addReplyComment(req.params.comment_id, comment._id)
     res.send({msg:`New Reply added : Comment id -> ${response._id}, Comment -> ${response.comment}`})
+})
+
+
+app.post('/similarity', async(req,res) => {
+    var docs = await reportController.getReports(101)
+    var sim_reports = await similarity.similarReports(docs[0],'bagofwords')
+    console.log(sim_reports)
+    res.send(sim_reports)
 })
 
 /*
