@@ -20,10 +20,20 @@ var passwordCheck = require('./middleware/passwordCheckmw')
 var projectExist = require('./middleware/projectExistmw.js')
 var projectCheck = require('./middleware/projectCheckmw.js')
 var reportCheck = require('./middleware/reportCheckmw.js')
-var addcomment = require('./middleware/addcommentmw.js')
 var commentCheck = require('./middleware/commentCheckmw.js')
 
+/*
+var isProject = require('./middleware/isProjectmw.js')
+var priorityCheck = require('./middleware/priorityCheckmw.js')
+var statusCheck = require('./middleware/statusCheckmw.js')
+var typeCheck = require('./middleware/typeCheckmw.js')
+var platformExist = require('./middleware/platformExistmw.js')
+var componentExist = require('./middleware/componentExistmw.js')
+var isComment = require('./middleware/isCommentmw.js')
+*/
+
 const { response } = require('express')
+const componentExistmw = require('./middleware/componentExistmw.js')
 app.get('/helloworld', (req,res) => {
     res.send("Hello World Endpoint")
 })
@@ -94,7 +104,7 @@ app.get('/report/:project_id',projectCheck, async(req,res) => {
     Endpoint to create report
 */
 app.post('/report/add', async(req, res) => {
-    var response = await reportController.createReport(req.body.project_id, req.body.platforms, req.body.type, req.body.status, req.body.priority, req.body.labels, req.body.reporter, req.body.assigned_to, req.body.title, req.body.description, req.body.version, req.body.first_comment=null, req.body.attachments=null)
+    var response = await reportController.createReport(req.body.project_id, req.body.platforms, req.body.type, req.body.priority, req.body.labels, req.body.reporter, req.body.components, req.body.assigned_to, req.body.title, req.body.description, req.body.version, req.body.first_comment, req.body.attachments)
     res.send({msg: `New Report created: Report id -> ${response._id}, Report Title -> ${response.title}, Project id -> ${response.project_id}`})
 })
 /*
@@ -124,7 +134,7 @@ app.get('/comment/:comment_id/reply', async(req,res) => {
 */
 app.post('/comment/:report_id', async (req, res) => {
     var comment = await commentController.createComment(req.body.user, req.body.comment)
-
+   
     var report = await reportController.getReportbyId(req.params.report_id)
     if (report.first_comment == null){
         await reportController.addComment(report._id, comment._id)
@@ -139,10 +149,17 @@ app.post('/comment/:report_id', async (req, res) => {
 /*
     Endpoint to reply a comment
 */
-app.post('/comment/:comment_id/reply',async(req,res) => {
+app.post('/comment/:comment_id/reply',commentCheck, async(req,res) => {
     var comment = await commentController.createComment(req.body.user, req.body.comment)
-    var response = await commentController.addReplyComment(req.params.comment_id, comment._id)
-    res.send({msg:`New Reply added : Comment id -> ${response._id}, Comment -> ${response.comment}`})
+    var headcomment = await commentController.getCommentById(req.params.comment_id)
+    if(headcomment.reply_comment == null){
+        await commentController.addReplyComment(headcomment._id, comment._id)
+        res.send({msg:`New Reply added : Comment id -> ${comment}`})
+    }
+    else{
+        await commentController.addCommentEnd(headcomment._id, comment._id)
+        res.send({msg:`New Reply added : Comment id -> ${comment}`})
+    }
 })
 
 /*

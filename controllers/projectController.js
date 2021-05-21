@@ -159,9 +159,37 @@ function addComponent(project_id, component){
 */
 
 function isComponent(project_id, component){
+    return new Promise((resolve,reject) => {
+        projectModel.findOne({project_id: project_id}, (err,docs) => {
+            if (err){
+                return reject(err)
+            }
+            if(docs.components.includes(component)){
+                resolve(true)
+            }else{
+                resolve(false)
+            }
+        })   
+    })
 
 }
-
+/*
+    Function to check if a platform exist for a project
+*/
+function isPlatform(project_id, platform){
+    return new Promise((resolve,reject) => {
+        projectModel.findOne({project_id: project_id}, (err,docs) => {
+            if (err){
+                return reject(err)
+            }
+            if(docs.platforms.includes(platform)){
+                resolve(true)
+            }else{
+                resolve(false)
+            }
+        })   
+    })
+}
 
 module.exports = {
     
@@ -170,6 +198,8 @@ module.exports = {
     getProjectbyId,
     getAllprojects,
     getTriagers,
-    addTriager
+    addTriager,
+    isPlatform,
+    isComponent
     
 }

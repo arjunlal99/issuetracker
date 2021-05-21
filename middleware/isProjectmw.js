@@ -1,11 +1,11 @@
 const projectController = require('../controllers/projectController.js')
 /*
-    Middleware function to check if the project is there or not for get request 
+    Middleware function to check if the project is there or not for post request 
 */
 module.exports = async (req,res,next) => {
-    var projectExists = await projectController.projectCheck(req.params.project_id)
-    // console.log(projectExists)
-    if (projectExists){
+    var isProject = await projectController.projectCheck(req.body.project_id)
+    // console.log(isProject)
+    if (isProject){
         next()
     }
     else{
