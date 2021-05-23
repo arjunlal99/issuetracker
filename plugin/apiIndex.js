@@ -11,7 +11,8 @@ const apiIndex = {
         "passwordCheck": userController.passwordCheck,
         "onUsernameCheck": userController.onUsernameCheck,
         "onAuthFail": userController.onAuthFail,
-        "onAuthSuccess": userController.onAuthSuccess
+        "onAuthSuccess": userController.onAuthSuccess,
+        "onSignUp": userController.onSignup
     },
     "projectController":{
 

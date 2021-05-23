@@ -191,6 +191,11 @@ function isPlatform(project_id, platform){
     })
 }
 
+
+function healthCheck(){
+    return conn.readyState
+}
+
 module.exports = {
     
     createProject,
@@ -200,6 +205,7 @@ module.exports = {
     getTriagers,
     addTriager,
     isPlatform,
-    isComponent
+    isComponent,
+    healthCheck
     
 }

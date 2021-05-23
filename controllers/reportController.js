@@ -1,6 +1,57 @@
 var mongoose = require('mongoose')
 require('dotenv').config({path:'../.env'})
+
+//Event Emitters
+var pluginManager = require("../plugin/pluginManager.js")
+
+const EventEmitter = require('events')
+/*
+    onNewReport event
+*/
+class CreateReport extends EventEmitter{
+    addListener(callback){
+        this.on('onNewReport', callback)
+    }
+}
+
+const onNewReport = new CreateReport()
+
+onNewReport.addListener((project_id, _id, reporter, title, description) => {
+    pluginManager.emitEvents('reportController', 'onNewReport', [project_id, _id, reporter, title,description])
+}) 
+
+
+/*
+    onFirstComment event
+*/
+class FirstComment extends EventEmitter{
+    addListener(callback){
+        this.on('onFirstComment',callback)
+    }
+}
+
+const onFirstComment = new FirstComment()
+
+onFirstComment.addListener((report_id,comment_id) => {
+    pluginManager.emitEvents('reportController', 'onFirstComment', [report_id, comment_id])
+})
+/*
+    onTriage event
+*/
+class Triage extends EventEmitter{
+    addListener(callback){
+        this.on('onTriage',callback)
+    }
+}
+
+const onTriage = new Triage()
+
+onTriage.addListener((id, triager, status, priority, labels, assigned_to, attachments) => {
+    pluginManager.emitEvents('reportController', 'onTriage', [id, triager, status, priority, labels, assigned_to, attachments])
+})
+
 var reportSchema = require('../models/report.js')
+const { report } = require('process')
 
 var conn = mongoose.createConnection(process.env.DB_URI, {useNewUrlParser: true, useUnifiedTopology:true, useCreateIndex: true, useFindAndModify: false})
 conn.once('open', async() => {
@@ -14,7 +65,7 @@ var reportModel = conn.model('reports', reportSchema)
     
 */
 
-function createReport( project_id, platforms, type, priority, labels, reporter, components, assigned_to, title, description, version, first_comment=null, attachments=null){
+function createReport( project_id, platforms, type, priority, reporter, component, title, description, version,labels=[], assigned_to=null,first_comment=null, attachments=null){
     return new Promise((resolve, reject) => {
             reportobj = {
             project_id : project_id,
@@ -22,7 +73,7 @@ function createReport( project_id, platforms, type, priority, labels, reporter, 
             type : type,
             labels : labels,
             reporter : reporter,
-            components : components,
+            component : component,
             assigned_to : assigned_to,
             title : title,
             description : description,
@@ -44,6 +95,7 @@ function createReport( project_id, platforms, type, priority, labels, reporter, 
                 return reject(err)
             }
             else{
+                onNewReport.emit('onNewReport', docs.project_id,docs._id, docs.reporter, docs.title, docs.description)
                 resolve(docs)
             }
         })
@@ -118,6 +170,7 @@ function getReports(project_id){
 }
 /*
    Function to add firstComment
+   id: report_id  comment:comment_id
 */
 function addComment(id,comment){
     return new Promise(async (resolve,reject) => {
@@ -127,7 +180,10 @@ function addComment(id,comment){
             if(err){
                 return reject(err)
             }
-            else resolve(docs)
+            else{
+                onFirstComment.emit('onFirstComment',id,comment)
+                resolve(docs)
+            } 
         })
     })
 } 
@@ -135,7 +191,8 @@ function addComment(id,comment){
 /*
   Function to triage a report
 */
-function triage(id, status = null, priority = 0, labels = null, assigned_to = null, attachments = null){
+//component fix
+function triage(id, triager, status = null, priority = 0, labels = null, assigned_to = null, attachments = null){
     return new Promise(async (resolve,reject) => {
         var report = await reportModel.findOne({_id : id})
         if(status){
@@ -160,12 +217,17 @@ function triage(id, status = null, priority = 0, labels = null, assigned_to = nu
             if(err){
                 return reject(err)
             }
-            else resolve(docs)
+            else{
+                onTriage.emit('onTriage',id, triager, status, priority, labels, assigned_to, attachments)
+                resolve(docs)
+            }
         })
     })
 }
 
-
+function healthCheck(){
+    return conn.readyState
+}
 
 
 module.exports = {
@@ -175,6 +237,7 @@ module.exports = {
    getReports,
    triage,
    reportCheck,
-   addComment
-   
+   addComment,
+   onNewReport,
+   healthCheck
 }

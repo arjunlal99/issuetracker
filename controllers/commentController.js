@@ -1,21 +1,31 @@
 var mongoose = require('mongoose')
 require('dotenv').config({path:'../.env'})
+
+//Event Emitters
+var pluginManager = require("../plugin/pluginManager.js")
+
+const EventEmitter = require('events')
+
+/*
+	onComment event
+*/
+class Comment extends EventEmitter{
+	addListener(callback){
+		this.on('onComment', callback)
+	}
+}
+
+/*
+	onReply event
+*/
+
+
 var commentSchema = require('../models/comment.js')
 
 var conn = mongoose.createConnection(process.env.DB_URI, {useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex:true, useFindAndModify: true})
 
 conn.once('open', async () => {
 	console.log('Comment Connection Established')
-   // addNextComment("60851209e3dfc41d06cbb0ca","6085745beefc403f0d293e6f").then((docs) => console.log(docs)).catch((err) => console.log(err))
-//	getNextCommentId("60851209e3dfc41d06cbb0ca").then((docs) => console.log(docs)).catch((err) => console.log(err))
-   // getNextCommentId("").then((docs) => console.log(docs)).catch((err) => console.log(err))
-  // doesExist("60851209e3dfc41d06cbb0ca").then((docs) => console.log(docs)).catch((err) => console.log(err))
-/*	createComment("Arjun", "Testing adding comments at the end").then((docs) => {
-		addCommentEnd("60851209e3dfc41d06cbb0ca", docs._id).then((doc) => console.log("added")).catch((error) => console.log("error"))
-	}).catch((err) => {
-		console.log(err)
-	})
-	*/
 })
 
 var commentModel = conn.model('comments', commentSchema)
@@ -164,6 +174,11 @@ function addCommentEnd(id, new_comment_id){
 	})
 }
 
+function healthCheck(){
+    return conn.readyState
+}
+
+
 module.exports = {
 	createComment,
 	getCommentById,
@@ -172,5 +187,6 @@ module.exports = {
     getNextCommentId,
     getReplyCommentId,
 	addCommentEnd,
-	doesExist
+	doesExist,
+	healthCheck
 }

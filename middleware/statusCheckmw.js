@@ -10,5 +10,9 @@ module.exports = (req,res,next) => {
             res.status(500).send({msg: "Invalid status value"})
         }
     }
-    else next()
+    else {
+        req.body.status = null
+        next()
+    }
+        
 }

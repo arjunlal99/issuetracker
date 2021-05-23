@@ -10,7 +10,7 @@ var reportSchema = new Schema({
     priority :{type: Number, default: 5},
     labels : [String],
     reporter : String,
-    components : [String],
+    component : String,
     assigned_to : [String],
     last_modified : {type: Date, default: Date.now()},
     title : String,

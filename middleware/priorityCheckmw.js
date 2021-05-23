@@ -10,6 +10,9 @@ module.exports = (req,res,next) => {
             res.status(500).send({msg: "Invalid priority value"})
         }
     }
-    else next()
+    else{
+        req.body.priority
+        next()
+    }
     
 }

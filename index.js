@@ -30,8 +30,7 @@ var projectExist = require('./middleware/projectExistmw.js')
 var projectCheck = require('./middleware/projectCheckmw.js')
 var reportCheck = require('./middleware/reportCheckmw.js')
 var commentCheck = require('./middleware/commentCheckmw.js')
-
-/*
+var isTriager = require('./middleware/isTriagermw.js')
 var isProject = require('./middleware/isProjectmw.js')
 var priorityCheck = require('./middleware/priorityCheckmw.js')
 var statusCheck = require('./middleware/statusCheckmw.js')
@@ -39,11 +38,14 @@ var typeCheck = require('./middleware/typeCheckmw.js')
 var platformExist = require('./middleware/platformExistmw.js')
 var componentExist = require('./middleware/componentExistmw.js')
 var isComment = require('./middleware/isCommentmw.js')
-*/
+var addReporter = require("./middleware/addReportermw.js")
+var addTriager = require("./middleware/addTriagermw.js")
+var componentExistmw = require('./middleware/componentExistmw.js')
+var verifyToken = require('./middleware/verifytokenmw.js')
 
 const { response } = require('express')
-const componentExistmw = require('./middleware/componentExistmw.js')
-app.get('/helloworld', (req,res) => {
+
+app.get('/helloworld',(req,res) => {
     res.send("Hello World Endpoint")
 })
 
@@ -114,15 +116,17 @@ app.get('/report/:project_id',projectCheck, async(req,res) => {
 /*
     Endpoint to create report
 */
-app.post('/report/add', async(req, res) => {
-    var response = await reportController.createReport(req.body.project_id, req.body.platforms, req.body.type, req.body.priority, req.body.labels, req.body.reporter, req.body.components, req.body.assigned_to, req.body.title, req.body.description, req.body.version, req.body.first_comment, req.body.attachments)
+app.post('/report/add', verifyToken, isProject, platformExist, typeCheck, priorityCheck, addReporter, componentExist, async(req, res) => {
+    //fix label,attachments middleware
+    var response = await reportController.createReport(req.body.project_id, req.body.platforms, req.body.type, req.body.priority,  req.body.reporter, req.body.component, req.body.title, req.body.description, req.body.version,labels = req.body.labels, attachments = req.body.attachments)
     res.send({msg: `New Report created: Report id -> ${response._id}, Report Title -> ${response.title}, Project id -> ${response.project_id}`})
 })
 /*
    Endpoint to triage a report
 */
-app.post('/report/triage',reportCheck, async(req,res) => {
-    var respose = await reportController.triage(req.body.report_id, req.body.status, req.body.priority, req.body.labels, req.body.assigned_to, req.body.attachments)
+app.post('/report/triage',verifyToken,reportCheck, isTriager, addTriager, statusCheck, priorityCheck, async(req,res) => {
+    //fix label assignedto attachment middleware
+    var respose = await reportController.triage(req.body.report_id, req.body.triager, status = req.body.status, priority=req.body.priority, labels=req.body.labels, assigned_to=req.body.assigned_to, attachments=req.body.attachments)
     res.send({msg : `Report -> ${response}`})
 })
 /*
@@ -135,15 +139,17 @@ app.get('/comment/:comment_id',commentCheck, async(req,res) =>{
 /*
    Endpoint to get reply of a comment
 */
-app.get('/comment/:comment_id/reply', async(req,res) => {
+app.get('/comment/:comment_id/reply',commentCheck, async(req,res) => {
+    //debug if neccessary
     var response = await commentController.getReplyCommentId(req.params.comment_id)
     var comment = await commentController.getCommentById(response)
     res.send({msg :  `Reply ${comment} `})
 })
 /*
-    Endpoint to add comment
+    Endpoint to add comment(Authenticated endpoint)
 */
-app.post('/comment/:report_id', async (req, res) => {
+app.post('/comment/:report_id',verifyToken, reportCheck,  async (req, res) => {
+    //fix req.body.user middleware
     var comment = await commentController.createComment(req.body.user, req.body.comment)
    
     var report = await reportController.getReportbyId(req.params.report_id)
@@ -160,7 +166,8 @@ app.post('/comment/:report_id', async (req, res) => {
 /*
     Endpoint to reply a comment
 */
-app.post('/comment/:comment_id/reply',commentCheck, async(req,res) => {
+app.post('/comment/:comment_id/reply',verifyToken, commentCheck, async(req,res) => {
+    //fix middleware user
     var comment = await commentController.createComment(req.body.user, req.body.comment)
     var headcomment = await commentController.getCommentById(req.params.comment_id)
     if(headcomment.reply_comment == null){

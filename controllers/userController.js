@@ -7,6 +7,21 @@ var pluginManager = require("../plugin/pluginManager.js")
 
 const EventEmitter = require('events')
 /*
+    onSignup event
+*/
+
+class SignUp extends EventEmitter{
+    addListener(callback){
+        this.on('onSignup', callback)
+    }
+}
+
+const onSignup = new SignUp()
+
+onSignup.addListener((username,email) => {
+    pluginManager.emitEvents('userController','onSignUp', [username,email])
+})
+/*
     onUsernameCheck event
     callback parameters => username(username checked), docs[true or false]
 */
@@ -57,13 +72,6 @@ var userSchema = require('../models/user.js')
 var conn = mongoose.createConnection(process.env.DB_URI, {useNewUrlParser: true, useUnifiedTopology:true})
 conn.once('open', async () => {
     console.log('User Connection Established')
-   // pluginManager.emitEvents()
-    //signUp('kopiko', 'kopiko@cappuccino.com', '123456')
-    
-    //usernameCheck('example').then((docs) => console.log(docs)).catch((err) => console.log(err))
-    //usernameCheck('somwthing').then((docs) => console.log(docs)).catch((err) => console.log(err))
-    //console.log(await usernameCheck('example'))
-    //console.log(await passwordCheck('example', 'somwthin'))
 })
 
 var userModel = conn.model('users', userSchema)
@@ -83,6 +91,7 @@ function signUp(username, email, password){
                 return reject(err)
             }
             else{
+                onSignup.emit('onSignUp', docs.username, docs.email)
                 resolve(docs)
             }
         })
@@ -159,6 +168,7 @@ module.exports = {
     usernameCheck,
     emailCheck,
     passwordCheck,
+    onSignup,
     onUsernameCheck,
     onAuthFail,
     onAuthSuccess,
