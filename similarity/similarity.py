@@ -8,7 +8,7 @@ count = CountVectorizer()
 new_report = sys.argv[1]
 existing_reports = sys.argv[2]
 threshold = float(sys.argv[3])
-
+rootDir = sys.argv[4]
 new_file = open(new_report, "r")
 existing_file = open(existing_reports,"r")
 
@@ -29,7 +29,7 @@ for x in range(len(sim_list)):
     if sim_list[x] > threshold:
         sim.append(x)
 
-index = open("index", "r")
+index = open(rootDir+"/similarity/"+"index", "r")
 
 ids = index.readlines()
 index.close()

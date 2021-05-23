@@ -3,13 +3,14 @@ const {spawn} = require('child_process')
 
 const reportController = require('../controllers/reportController.js')
 
+console.log(rootDir)
 /*
     Gather reports and write them to a temporary file
 */
 async function tempReports(project_id, temp_file = "temp", index_file= "index"){
     let docs = await reportController.getReports(project_id)
-    var file_descriptor = await openSync("./"+temp_file, flags = "w")
-    var index_descriptor = await openSync("./"+index_file, flags ="w")
+    var file_descriptor = await openSync( rootDir + "/similarity/" + temp_file, flags = "w")
+    var index_descriptor = await openSync(rootDir+ "/similarity/" +index_file, flags ="w")
     docs.forEach(async report => {
         var line = report._id + " " + report.description +" " + report.title + " " + report.type + " " + report.component + "\n"
         writeSync(index_descriptor,report._id+"\n")
@@ -21,7 +22,7 @@ async function tempReports(project_id, temp_file = "temp", index_file= "index"){
 
 */
 async function tempReport(report, output_file){
-    var file_descriptor = await openSync("./"+output_file, flags="w")
+    var file_descriptor = await openSync(rootDir + "/similarity/" + output_file, flags="w")
     var line = report._id + " " + report.description +" " + report.title + " " + report.type + " " + report.component + "\n"
     console.log(writeSync(file_descriptor, line))
 }
@@ -31,7 +32,7 @@ async function tempReport(report, output_file){
 */
 async function bagOfWords(temp_file="temp", output_file="bagofwords"){
     return new Promise((resolve,reject) => {
-        bag_of_words = spawn("python3", ["bagofwords.py", temp_file, output_file])
+        bag_of_words = spawn("/bin/python3", [rootDir + "/similarity/" +"bagofwords.py", rootDir + "/similarity/" + temp_file, rootDir + "/similarity/" + output_file])
         bag_of_words.stdout.on('data', data => {
             resolve(true)
         })
@@ -44,14 +45,14 @@ async function bagOfWords(temp_file="temp", output_file="bagofwords"){
 /*
 
 */
-async function similarReports(new_report, existing_reports,threshold=0.5){
+async function similarReports(new_report, existing_reports="bagofwords",threshold=0.1){
     return new Promise(async (resolve, reject) => {
         tempReport(new_report,"newreport")
         await bagOfWords("newreport", "newbagofwords")
         console.log('here')
-        similarity = spawn("python3", ["similarity.py", "newbagofwords", existing_reports, threshold])
+        similarity = spawn("/bin/python3", [rootDir + "/similarity/" + "similarity.py",rootDir + "/similarity/" + "newbagofwords",rootDir + "/similarity/" + existing_reports, threshold, rootDir])
         similarity.stdout.on('data', data => {
-            console.log('There')
+            //console.log('There')
             console.log(data.toString())
             resolve(data.toString())
         })
@@ -72,7 +73,8 @@ setTimeout(async () => {
 */
 
 module.exports = {
-    similarReports
+    similarReports,
+    tempReports
 }
 
 

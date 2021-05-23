@@ -1,3 +1,5 @@
+var path = require('path')
+global.rootDir = path.dirname(require.main.filename)//determines project root directory at startup from index.js
 var express = require('express')
 var app = express()
 require('dotenv').config()
@@ -5,7 +7,7 @@ var cookieParser = require('cookie-parser')
 
 var jwt = require('./auth/jwt.js')
 
-//var loadPlugin = require('./plugin/pluginLoader.js')
+
 
 //importing controllers
 var userController = require('./controllers/userController.js')
@@ -14,7 +16,7 @@ var reportController = require('./controllers/reportController.js')
 var commentController = require('./controllers/commentController.js')
 
 var similarity = require("./similarity/similarity.js")
-
+similarity.tempReports(101)
 //importing middleware
 var userCheck = require('./middleware/userCheckmw.js')
 var usernameCheck = require('./middleware/usernameCheckmw.js')
@@ -152,7 +154,7 @@ app.post('/comment/:comment_id/reply',async(req,res) => {
 app.post('/similarity', async(req,res) => {
     var docs = await reportController.getReports(101)
     var sim_reports = await similarity.similarReports(docs[0],'bagofwords')
-    console.log(sim_reports)
+    //console.log(sim_reports)
     res.send(sim_reports)
 })
 
