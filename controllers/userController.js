@@ -6,7 +6,10 @@ require('dotenv').config({path:'../.env'})
 var pluginManager = require("../plugin/pluginManager.js")
 
 const EventEmitter = require('events')
-
+/*
+    onUsernameCheck event
+    callback parameters => username(username checked), docs[true or false]
+*/
 class UserName extends EventEmitter{
     addListener(callback){
         this.on('onUsernameCheck', callback)
@@ -19,7 +22,35 @@ onUsernameCheck.addListener((username,docs) => {
     //console.log(username,docs)
     pluginManager.emitEvents("userController", "onUsernameCheck", [username,docs])
 })
+/*
+    onAuthFail event
+    callback parameters => username(username for which auth failed)
+*/
+class AuthFail extends EventEmitter{
+    addListener(callback){
+        this.on('onAuthFail', callback)
+    }
+}
 
+const onAuthFail = new AuthFail()
+
+onAuthFail.addListener((username) => {
+    pluginManager.emitEvents("userController", "onAuthFail", [username])
+})
+/*
+    onAuthSuccess event
+*/
+class AuthSuccess extends EventEmitter{
+    addListener(callback){
+        this.on("onAuthSuccess", callback)
+    }
+}
+
+const onAuthSuccess = new AuthSuccess()
+
+onAuthSuccess.addListener((username) => {
+    pluginManager.emitEvents("userController", "onAuthSuccess", [username])
+})
 
 var userSchema = require('../models/user.js')
 
@@ -105,8 +136,14 @@ function passwordCheck(username, password){
                 return reject(err)
             }
             else{
-                if (docs.password_hash == generateHash(password)) resolve(true)
-                else resolve(false)
+                if (docs.password_hash == generateHash(password)){
+                    onAuthSuccess.emit('onAuthSuccess', username)
+                    resolve(true)
+                } 
+                else{
+                    onAuthFail.emit('onAuthFail', username)
+                    resolve(false)
+                }
             }
         })
     })
@@ -123,5 +160,7 @@ module.exports = {
     emailCheck,
     passwordCheck,
     onUsernameCheck,
+    onAuthFail,
+    onAuthSuccess,
     healthCheck
 }

@@ -3,15 +3,15 @@ const {verifyJwt} = require("../auth/jwt.js")
 
 module.exports = async (req,res,next) => {
     if (!req.headers.authorization){
-        res.send("Auth Token not found")
+        res.status(500).send({msg:"Auth Token not found"})
     }else{
-        console.log(req.headers.authorization)
+        //console.log(req.headers.authorization)
         const token = req.headers.authorization.split(" ")
         verifyJwt(token[1]).then((decoded) => {
             console.log("Successfully verified : ", decoded)
             next()
         }).catch((err) => {
-            res.send("Invalid auth token")
+            res.status(500).send({msg:"Invalid auth token"})
         })
     }
 }

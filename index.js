@@ -9,6 +9,8 @@ require('dotenv').config()
 
 
 var cookieParser = require('cookie-parser')
+var multer = require("multer")
+var upload = multer({dest: 'temp/'})
 
 var jwt = require('./auth/jwt.js')
 
