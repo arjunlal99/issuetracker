@@ -59,9 +59,12 @@ function projectCheck(project_id){
         projectModel.exists({project_id: project_id}, (err,docs) => {
             if (err){
                 return reject(err)
+                console.log("No")
             }
             else{
+                console.log(docs)
                 resolve(docs)
+               
             }
         })
     })
@@ -133,13 +136,17 @@ function getTriagers(project_id){
 function isTriager(project_id, username){
     return new Promise((resolve,reject) => {
         projectModel.findOne({project_id: project_id}, (err,docs) => {
+            console.log("Project controller")
+            console.log(project_id)
             if (err){
                 return reject(err)
             }
             if(docs.triagers.includes(username)){
                 resolve(true)
+                console.log("True")
             }else{
                 resolve(false)
+                console.log("false")
             }
         })   
     })
@@ -164,7 +171,7 @@ function isComponent(project_id, component){
             if (err){
                 return reject(err)
             }
-            if(docs.components.includes(component)){
+            if(docs.component.includes(component)){
                 resolve(true)
             }else{
                 resolve(false)
@@ -206,6 +213,7 @@ module.exports = {
     addTriager,
     isPlatform,
     isComponent,
+    isTriager,
     healthCheck
     
 }

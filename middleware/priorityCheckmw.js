@@ -3,6 +3,7 @@
 */
 module.exports = (req,res,next) => {
     if(req.body.priority){
+        console.log("req.body.priority")
         if (req.body.priority>=1 && req.body.priority<=5){
             next()
         }
