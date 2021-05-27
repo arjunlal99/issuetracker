@@ -17,7 +17,7 @@ var reportSchema = new Schema({
     description : String,
     version : Number,
     first_comment : {type: String, default: null},
-    attachments : {type: [String], default: null}
+    attachments : [String]
 })
 
 module.exports = reportSchema

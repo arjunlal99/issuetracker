@@ -65,7 +65,7 @@ var reportModel = conn.model('reports', reportSchema)
     
 */
 
-function createReport( project_id, platforms, type, priority, reporter, component, title, description, version,labels=[], assigned_to=null,first_comment=null, attachments=null){
+function createReport( project_id, platforms, type, priority, reporter, component, title, description, version,labels=[], attachments = null){
     return new Promise((resolve, reject) => {
             reportobj = {
             project_id : project_id,
@@ -74,16 +74,12 @@ function createReport( project_id, platforms, type, priority, reporter, componen
             labels : labels,
             reporter : reporter,
             component : component,
-            assigned_to : assigned_to,
             title : title,
             description : description,
             version : version,
         }
         if(priority){
             reportobj.priority = priority
-        }
-        if(first_comment){
-            reportobj.first_comment = first_comment
         }
         if(attachments){
             reportobj.attachments = attachments
@@ -192,7 +188,7 @@ function addComment(id,comment){
   Function to triage a report
 */
 //component fix
-function triage(id, triager, status = null, priority = 0, labels = null, assigned_to = null, attachments = null){
+function triage(id, triager, status = null, priority = 0, labels = null, assigned_to = null){
     return new Promise(async (resolve,reject) => {
         var report = await reportModel.findOne({_id : id})
         if(status){
@@ -210,9 +206,6 @@ function triage(id, triager, status = null, priority = 0, labels = null, assigne
             }
             else report.assigned_to=assigned_to
         }
-        if(attachments){
-            report.attachments.push(attachments)
-        }
         report.save((err,docs) => {
             if(err){
                 return reject(err)
@@ -224,6 +217,7 @@ function triage(id, triager, status = null, priority = 0, labels = null, assigne
         })
     })
 }
+
 
 function healthCheck(){
     return conn.readyState

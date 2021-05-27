@@ -50,15 +50,15 @@ var commentModel = conn.model('comments', commentSchema)
 	Function to create a new comment(_id set by mongoose is used for comment_id)
 */
 
-function createComment(user, comment, files=null){
+function createComment(user, comment, attachments=null){
 	return new Promise((resolve, reject) => {
         commentObj = {
             user: user,
             comment: comment
         }
 
-        if (files){
-            commentObj.files = files
+        if (attachments){
+            commentObj.attachments = attachments
         }
 
 		var commentInstance = new commentModel(commentObj)

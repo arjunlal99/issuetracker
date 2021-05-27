@@ -4,6 +4,7 @@ const projectController = require('../controllers/projectController.js')
 */
 module.exports = async (req,res,next) => {
     var projectExists = await projectController.projectCheck(req.body.project_id)
+    console.log(projectExists)
     if (projectExists){
         res.status(500).send({msg: "Project already exists"})
     }
