@@ -239,5 +239,7 @@ module.exports = {
    reportCheck,
    addComment,
    onNewReport,
+   onFirstComment,
+   onTriage,
    healthCheck
 }

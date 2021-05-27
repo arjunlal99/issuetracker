@@ -8,6 +8,7 @@ const EventEmitter = require('events')
 
 /*
 	onComment event
+	emitted when a new comment is added
 */
 class Comment extends EventEmitter{
 	addListener(callback){
@@ -15,10 +16,25 @@ class Comment extends EventEmitter{
 	}
 }
 
+const onComment = new Comment()
+
+onComment.addListener((id, new_comment_id) => {
+	pluginManager.emitEvents('commentController','onComment', [id,new_comment_id])
+})
 /*
 	onReply event
 */
+class Reply extends EventEmitter{
+	addListener(callback){
+		this.on('onReply', callback)
+	}
+}
 
+const onReply = new Reply()
+
+onReply.addListener((id, new_comment_id) => {
+	pluginManager.emitEvents('commentController', 'onReply', [id, new_comment_id])
+})
 
 var commentSchema = require('../models/comment.js')
 
@@ -127,6 +143,7 @@ function addNextComment(id, new_comment_id){
 				return reject(err)
 			}
 			else{
+				onComment.emit('onComment',id,new_comment_id)
 				resolve(docs)
 			}
 		})
@@ -146,6 +163,7 @@ function addReplyComment(id, new_comment_id){
 				return reject(err)
 			}
 			else{
+				onReply.emit('onReply', id, new_comment_id)
 				resolve(docs)
 			}
 		})
@@ -188,5 +206,7 @@ module.exports = {
     getReplyCommentId,
 	addCommentEnd,
 	doesExist,
+	onComment,
+	onReply,
 	healthCheck
 }
