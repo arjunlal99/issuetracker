@@ -53,10 +53,9 @@ onTriage.addListener((id, triager, status, priority, labels, assigned_to, attach
 var reportSchema = require('../models/report.js')
 const { report } = require('process')
 
-var conn = mongoose.createConnection(process.env.DB_URI, {useNewUrlParser: true, useUnifiedTopology:true, useCreateIndex: true, useFindAndModify: false})
+var conn = mongoose.createConnection(process.env.DUMMY_URI, {useNewUrlParser: true, useUnifiedTopology:true, useCreateIndex: true, useFindAndModify: false})
 conn.once('open', async() => {
     console.log('Report Connection Established')
-    //createReport(101,"linux","bug",1,'anjaly','test','test',1).then((docs) => console.log(docs)).catch((err) => console.log(err))
 })
 
 var reportModel = conn.model('reports', reportSchema)
@@ -64,6 +63,7 @@ var reportModel = conn.model('reports', reportSchema)
     Function to create new report
     
 */
+
 
 function createReport( project_id, platforms, type, priority, reporter, component, title, description, version,labels=[], attachments = null){
     return new Promise((resolve, reject) => {
@@ -77,6 +77,7 @@ function createReport( project_id, platforms, type, priority, reporter, componen
             title : title,
             description : description,
             version : version,
+            component: component
         }
         if(priority){
             reportobj.priority = priority
@@ -149,7 +150,6 @@ function getAllreports(){
     })
 
 }
-
 
 /*
     Function to retrieve reports of a project using project_id

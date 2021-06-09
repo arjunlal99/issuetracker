@@ -16,6 +16,7 @@ var reportSchema = new Schema({
     title : String,
     description : String,
     version : Number,
+    component: String,
     first_comment : {type: String, default: null},
     attachments : [String]
 })

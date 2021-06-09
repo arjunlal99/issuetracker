@@ -1,5 +1,10 @@
+
+var path = require('path')
+global.rootDir = path.dirname(require.main.filename)//determines project root directory at startup from index.js
+
 var rl = require('./cli.js')
 var pluginManager = require('./plugin/pluginManager.js')
+
 
 var express = require('express')
 var app = express()
@@ -14,7 +19,7 @@ var upload = multer({dest: 'temp/'})
 
 var jwt = require('./auth/jwt.js')
 
-//var loadPlugin = require('./plugin/pluginLoader.js')
+
 
 //importing controllers
 var userController = require('./controllers/userController.js')
@@ -22,6 +27,8 @@ var projectController = require('./controllers/projectController.js')
 var reportController = require('./controllers/reportController.js')
 var commentController = require('./controllers/commentController.js')
 
+var similarity = require("./similarity/similarity.js")
+similarity.tempReports(101)
 //importing middleware
 var userCheck = require('./middleware/userCheckmw.js')
 var usernameCheck = require('./middleware/usernameCheckmw.js')
@@ -165,6 +172,7 @@ app.post('/comment/:report_id',upload.array('attach',10), verifyToken, reportChe
     var comment = await commentController.createComment(req.body.user, req.body.comment, attachments = req.body.attachments)
    
     var report = await reportController.getReportbyId(req.params.report_id)
+    
     if (report.first_comment == null){
         await reportController.addComment(report._id, comment._id)
         res.send({msg: `Comment added to report : ${comment}`})
@@ -190,6 +198,14 @@ app.post('/comment/:comment_id/reply',upload.array('attach',10), verifyToken, co
         await commentController.addCommentEnd(headcomment._id, comment._id)
         res.send({msg:`New Reply added : Comment id -> ${comment}`})
     }
+})
+
+
+app.post('/similarity', async(req,res) => {
+    var docs = await reportController.getReports(101)
+    var sim_reports = await similarity.similarReports(docs[0],'bagofwords')
+    //console.log(sim_reports)
+    res.send(sim_reports)
 })
 
 /*
