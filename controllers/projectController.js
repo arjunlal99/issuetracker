@@ -59,9 +59,12 @@ function projectCheck(project_id){
         projectModel.exists({project_id: project_id}, (err,docs) => {
             if (err){
                 return reject(err)
+                console.log("No")
             }
             else{
+                console.log(docs)
                 resolve(docs)
+               
             }
         })
     })
@@ -133,13 +136,17 @@ function getTriagers(project_id){
 function isTriager(project_id, username){
     return new Promise((resolve,reject) => {
         projectModel.findOne({project_id: project_id}, (err,docs) => {
+            console.log("Project controller")
+            console.log(project_id)
             if (err){
                 return reject(err)
             }
             if(docs.triagers.includes(username)){
                 resolve(true)
+                console.log("True")
             }else{
                 resolve(false)
+                console.log("false")
             }
         })   
     })
@@ -159,9 +166,42 @@ function addComponent(project_id, component){
 */
 
 function isComponent(project_id, component){
+    return new Promise((resolve,reject) => {
+        projectModel.findOne({project_id: project_id}, (err,docs) => {
+            if (err){
+                return reject(err)
+            }
+            if(docs.component.includes(component)){
+                resolve(true)
+            }else{
+                resolve(false)
+            }
+        })   
+    })
 
 }
+/*
+    Function to check if a platform exist for a project
+*/
+function isPlatform(project_id, platform){
+    return new Promise((resolve,reject) => {
+        projectModel.findOne({project_id: project_id}, (err,docs) => {
+            if (err){
+                return reject(err)
+            }
+            if(docs.platforms.includes(platform)){
+                resolve(true)
+            }else{
+                resolve(false)
+            }
+        })   
+    })
+}
 
+
+function healthCheck(){
+    return conn.readyState
+}
 
 module.exports = {
     
@@ -170,6 +210,10 @@ module.exports = {
     getProjectbyId,
     getAllprojects,
     getTriagers,
-    addTriager
+    addTriager,
+    isPlatform,
+    isComponent,
+    isTriager,
+    healthCheck
     
 }

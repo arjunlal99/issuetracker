@@ -6,10 +6,11 @@ var reportSchema = new Schema({
     project_id :  {type: Number, required: true},
     platforms : [String],
     type : String,
-    status : String,
-    priority : Number,
+    status : {type: String, default: 'new' },
+    priority :{type: Number, default: 5},
     labels : [String],
     reporter : String,
+    component : String,
     assigned_to : [String],
     last_modified : {type: Date, default: Date.now()},
     title : String,
@@ -17,7 +18,7 @@ var reportSchema = new Schema({
     version : Number,
     component: String,
     first_comment : {type: String, default: null},
-    attachments : {type: [String], default: null}
+    attachments : [String]
 })
 
 module.exports = reportSchema

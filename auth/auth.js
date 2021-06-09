@@ -1,12 +1,10 @@
-var crypto = require('crypto')
-var hash = crypto.createHash('sha256')
+const { pbkdf2Sync} = require('crypto')
 
 //function to generate hash
 function generateHash(payload){
-    hash_update = hash.update(payload, 'utf-8')
-    return hash_update.digest('hex')
+    const key = pbkdf2Sync(payload, 'project', 10000, 32, 'sha256')
+    return key.toString('hex')
 }
-
 
 
 module.exports = {

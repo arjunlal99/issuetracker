@@ -1,9 +1,21 @@
+
 var path = require('path')
 global.rootDir = path.dirname(require.main.filename)//determines project root directory at startup from index.js
+
+var rl = require('./cli.js')
+var pluginManager = require('./plugin/pluginManager.js')
+
+
 var express = require('express')
 var app = express()
+
+
 require('dotenv').config()
+
+
 var cookieParser = require('cookie-parser')
+var multer = require("multer")
+var upload = multer({dest: 'temp/'})
 
 var jwt = require('./auth/jwt.js')
 
@@ -24,17 +36,37 @@ var passwordCheck = require('./middleware/passwordCheckmw')
 var projectExist = require('./middleware/projectExistmw.js')
 var projectCheck = require('./middleware/projectCheckmw.js')
 var reportCheck = require('./middleware/reportCheckmw.js')
-var addcomment = require('./middleware/addcommentmw.js')
 var commentCheck = require('./middleware/commentCheckmw.js')
+var isTriager = require('./middleware/isTriagermw.js')
+var isProject = require('./middleware/isProjectmw.js')
+var priorityCheck = require('./middleware/priorityCheckmw.js')
+var statusCheck = require('./middleware/statusCheckmw.js')
+var typeCheck = require('./middleware/typeCheckmw.js')
+var platformExist = require('./middleware/platformExistmw.js')
+var componentExist = require('./middleware/componentExistmw.js')
+var isComment = require('./middleware/isCommentmw.js')
+var addReporter = require("./middleware/addReportermw.js")
+var addTriager = require("./middleware/addTriagermw.js")
+var componentExistmw = require('./middleware/componentExistmw.js')
+var verifyToken = require('./middleware/verifytokenmw.js')
+var labelExist = require('./middleware/labelExistmw.js')
+var assignedtoCheck = require('./middleware/assignedtoCheckmw.js')
+var addCommenter = require('./middleware/addCommentermw.js')
+var fileupload = require('./middleware/fileuploadmw.js')
+var isReport = require('./middleware/isReportmw.js')
+const fileuploadmw = require('./middleware/fileuploadmw.js')
 
 const { response } = require('express')
-app.get('/helloworld', (req,res) => {
+
+
+app.get('/helloworld',(req,res) => {
     res.send("Hello World Endpoint")
 })
 
 app.use(express.urlencoded({extended: true}))
 app.use(express.json())
 app.use(cookieParser())
+
 /*
     Endpoint for signing up new user
 */
@@ -51,6 +83,7 @@ app.post('/auth/signup', userCheck, async (req,res) => {
 app.post('/auth/gentoken', usernameCheck, passwordCheck, async (req,res) => {
 
     var token = jwt.createJwt(req.body.username)
+    console.log(token)
     res.cookie('token', token)
     res.send({msg: 'Auth Token Cookie set successfully'})
 
@@ -97,15 +130,18 @@ app.get('/report/:project_id',projectCheck, async(req,res) => {
 /*
     Endpoint to create report
 */
-app.post('/report/add', async(req, res) => {
-    var response = await reportController.createReport(req.body.project_id, req.body.platforms, req.body.type, req.body.status, req.body.priority, req.body.labels, req.body.reporter, req.body.assigned_to, req.body.title, req.body.description, req.body.version, req.body.first_comment=null, req.body.attachments=null)
+app.post('/report/add',upload.array('attach', 12), verifyToken,isProject,platformExist,typeCheck, priorityCheck, addReporter, componentExist, labelExist,  fileupload,  async(req, res) => {
+    //fix label,attachments middleware
+    var response = await reportController.createReport(req.body.project_id, req.body.platforms, req.body.type, req.body.priority,  req.body.reporter, req.body.component, req.body.title, req.body.description, req.body.version,labels = req.body.labels, attachments = req.body.attachments)
     res.send({msg: `New Report created: Report id -> ${response._id}, Report Title -> ${response.title}, Project id -> ${response.project_id}`})
 })
 /*
    Endpoint to triage a report
 */
-app.post('/report/triage',reportCheck, async(req,res) => {
-    var respose = await reportController.triage(req.body.report_id, req.body.status, req.body.priority, req.body.labels, req.body.assigned_to, req.body.attachments)
+app.post('/report/triage',verifyToken, isReport, isTriager, addTriager, statusCheck, priorityCheck, labelExist, assignedtoCheck, async(req,res) => {
+
+    
+    var respose = await reportController.triage(req.body.report_id, req.body.triager, status = req.body.status, priority=req.body.priority, labels=req.body.labels, assigned_to=req.body.assigned_to)
     res.send({msg : `Report -> ${response}`})
 })
 /*
@@ -118,17 +154,23 @@ app.get('/comment/:comment_id',commentCheck, async(req,res) =>{
 /*
    Endpoint to get reply of a comment
 */
-app.get('/comment/:comment_id/reply', async(req,res) => {
+app.get('/comment/:comment_id/reply',commentCheck, async(req,res) => {
     var response = await commentController.getReplyCommentId(req.params.comment_id)
-    var comment = await commentController.getCommentById(response)
-    res.send({msg :  `Reply ${comment} `})
+    if(response){
+        var comment = await commentController.getCommentById(response)
+        res.send({msg :  `Reply ${comment} `})
+    }
+    else{
+        res.send({msg : `Reply not found ` })
+    }
 })
 /*
-    Endpoint to add comment
+    Endpoint to add comment(Authenticated endpoint)
 */
-app.post('/comment/:report_id', async (req, res) => {
-    var comment = await commentController.createComment(req.body.user, req.body.comment)
-
+app.post('/comment/:report_id',upload.array('attach',10), verifyToken, reportCheck, addCommenter, fileupload, async (req, res) => {
+    
+    var comment = await commentController.createComment(req.body.user, req.body.comment, attachments = req.body.attachments)
+   
     var report = await reportController.getReportbyId(req.params.report_id)
     
     if (report.first_comment == null){
@@ -144,10 +186,18 @@ app.post('/comment/:report_id', async (req, res) => {
 /*
     Endpoint to reply a comment
 */
-app.post('/comment/:comment_id/reply',async(req,res) => {
-    var comment = await commentController.createComment(req.body.user, req.body.comment)
-    var response = await commentController.addReplyComment(req.params.comment_id, comment._id)
-    res.send({msg:`New Reply added : Comment id -> ${response._id}, Comment -> ${response.comment}`})
+app.post('/comment/:comment_id/reply',upload.array('attach',10), verifyToken, commentCheck, addCommenter,fileupload, async(req,res) => {
+    
+    var comment = await commentController.createComment(req.body.user, req.body.comment, attachments = req.body.attachments)
+    var headcomment = await commentController.getCommentById(req.params.comment_id)
+    if(headcomment.reply_comment == null){
+        await commentController.addReplyComment(headcomment._id, comment._id)
+        res.send({msg:`New Reply added : Comment id -> ${comment}`})
+    }
+    else{
+        await commentController.addCommentEnd(headcomment._id, comment._id)
+        res.send({msg:`New Reply added : Comment id -> ${comment}`})
+    }
 })
 
 
@@ -160,10 +210,18 @@ app.post('/similarity', async(req,res) => {
 
 /*
 function loadPlugins(){
-    loadPlugin('/home/arjun/testPlugin')
+    //loadPlugin('/home/arjun/testPlugin', pluginManager)
+   // loadPlugin('/home/arjun/testPlugin', pluginManager)
 }
 */
+
+
+
 app.listen(8001, () => {
     console.log("Application listening at port 8001...")
-   // setTimeout(loadPlugins, 10000)
+    //setTimeout(loadPlugins, 0)
+    
+    
+    rl.prompt()
 })
+ 

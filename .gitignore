@@ -1,5 +1,7 @@
 .env
 /node_modules
-/plugin
+/plugin/temp
 test.js
-/similarity/temp
+test.ts
+/temp
+

@@ -1,6 +1,6 @@
 const projectController = require('../controllers/projectController.js')
 /*
-    Middleware function to check if the project is there or not
+    Middleware function to check if the project is there or not for get request 
 */
 module.exports = async (req,res,next) => {
     var projectExists = await projectController.projectCheck(req.params.project_id)

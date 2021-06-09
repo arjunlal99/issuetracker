@@ -1,6 +1,6 @@
 const commentController = require('../controllers/commentController.js')
 /*
-    Middleware function to check if comment already exists 
+    Middleware function to check if comment already exists for get request
 */
 module.exports = async (req,res,next) => {
     var commentExists = await commentController.doesExist(req.params.comment_id)

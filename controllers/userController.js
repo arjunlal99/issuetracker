@@ -1,17 +1,77 @@
 var generateHash = require('../auth/auth.js').generateHash //function to generate hash using sha-256 algorithm
 var mongoose = require('mongoose')
 require('dotenv').config({path:'../.env'})
+
+//Event Emitters
+var pluginManager = require("../plugin/pluginManager.js")
+
+const EventEmitter = require('events')
+/*
+    onSignup event
+*/
+
+class SignUp extends EventEmitter{
+    addListener(callback){
+        this.on('onSignup', callback)
+    }
+}
+
+const onSignup = new SignUp()
+
+onSignup.addListener((username,email) => {
+    pluginManager.emitEvents('userController','onSignUp', [username,email])
+})
+/*
+    onUsernameCheck event
+    callback parameters => username(username checked), docs[true or false]
+*/
+class UserName extends EventEmitter{
+    addListener(callback){
+        this.on('onUsernameCheck', callback)
+    }
+}
+
+const onUsernameCheck = new UserName()
+
+onUsernameCheck.addListener((username,docs) => {
+    //console.log(username,docs)
+    pluginManager.emitEvents("userController", "onUsernameCheck", [username,docs])
+})
+/*
+    onAuthFail event
+    callback parameters => username(username for which auth failed)
+*/
+class AuthFail extends EventEmitter{
+    addListener(callback){
+        this.on('onAuthFail', callback)
+    }
+}
+
+const onAuthFail = new AuthFail()
+
+onAuthFail.addListener((username) => {
+    pluginManager.emitEvents("userController", "onAuthFail", [username])
+})
+/*
+    onAuthSuccess event
+*/
+class AuthSuccess extends EventEmitter{
+    addListener(callback){
+        this.on("onAuthSuccess", callback)
+    }
+}
+
+const onAuthSuccess = new AuthSuccess()
+
+onAuthSuccess.addListener((username) => {
+    pluginManager.emitEvents("userController", "onAuthSuccess", [username])
+})
+
 var userSchema = require('../models/user.js')
 
 var conn = mongoose.createConnection(process.env.DB_URI, {useNewUrlParser: true, useUnifiedTopology:true})
 conn.once('open', async () => {
     console.log('User Connection Established')
-    
-    //signUp('kopiko', 'kopiko@cappuccino.com', '123456')
-    
-    //userCheck('example', 'example@email.com').then((docs) => console.log("user exists")).catch((err) => console.log(err))
-    //console.log(await usernameCheck('example'))
-    //console.log(await passwordCheck('example', 'somwthin'))
 })
 
 var userModel = conn.model('users', userSchema)
@@ -31,6 +91,7 @@ function signUp(username, email, password){
                 return reject(err)
             }
             else{
+                onSignup.emit('onSignUp', docs.username, docs.email)
                 resolve(docs)
             }
         })
@@ -48,6 +109,7 @@ function usernameCheck(username){
                 return reject(err)
             }
             else{
+                onUsernameCheck.emit('onUsernameCheck', username, docs)
                 resolve(docs)
             }
         })
@@ -83,11 +145,21 @@ function passwordCheck(username, password){
                 return reject(err)
             }
             else{
-                if (docs.password_hash == generateHash(password)) resolve(true)
-                else resolve(false)
+                if (docs.password_hash == generateHash(password)){
+                    onAuthSuccess.emit('onAuthSuccess', username)
+                    resolve(true)
+                } 
+                else{
+                    onAuthFail.emit('onAuthFail', username)
+                    resolve(false)
+                }
             }
         })
     })
+}
+
+function healthCheck(){
+    return conn.readyState
 }
 
 module.exports = {
@@ -95,5 +167,10 @@ module.exports = {
     signUp,
     usernameCheck,
     emailCheck,
-    passwordCheck
+    passwordCheck,
+    onSignup,
+    onUsernameCheck,
+    onAuthFail,
+    onAuthSuccess,
+    healthCheck
 }

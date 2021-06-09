@@ -9,8 +9,18 @@ function createJwt(payload){
 }
 
 function verifyJwt(token){
-    return jwt.verify(token, process.env.JWT_SECRET)
+    //return jwt.verify(token, process.env.JWT_SECRET)
+    return new Promise((resolve,reject) => {
+        jwt.verify(token, process.env.JWT_SECRET, (err,decoded) => {
+            if (err){
+                return reject(err)
+            }else{
+                resolve(decoded)
+            }
+        })
+    })
 }
+
 
 module.exports = {
     createJwt,
